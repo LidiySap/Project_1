@@ -32,7 +32,7 @@ label_21 = tk.Label(text = "")
 label_21.grid(row=2, column=1, sticky="w")
 
 # Создание текстового вывода c прокруткой
-output_text = st(height = 22, width = 50)
+output_text = st(height = 20, width = 50)
 output_text.grid(row=3, column=1, padx=10, pady=10, sticky="w")
 
 # Диалог открытия файла
@@ -84,20 +84,57 @@ def list_meet_name(fields_list):
     # Не набралось нужного количества совпадений
     return False, ratio
     
+    # Если в этом поле e-mail, пусть вернет True    
+def meet_mail(field):
+    checkfor = ['@']
+    for s in checkfor:
+        if s in str(field): # Нашлось!
+            return True
+    # Ничего не совпало
+    return False
+    
+ # Если в этом списке многие элементы содержат mail, пусть вернет True    
+def list_meet_mail(fields_list):
+    counter_total = 0
+    counter_meet = 0
+    for list_item in fields_list:
+        counter_total += 1
+        if meet_mail(list_item):
+            counter_meet += 1
+    # Конец подсчета
+    ratio = counter_meet / counter_total
+    if ratio > 0.5:
+        return True, ratio
+    # Не набралось нужного количества совпадений
+    return False, ratio
+    
 # Пройти все столбцы    
 def check_all_columns(df):
     columns_cnt = df.shape[1]
     for i in range(columns_cnt): # От 0 до columns_cnt-1
         lst = get_column(df, i)
-        result = list_meet_name(lst)
-        if result[0]:
+        
+        # Первый критерий
+        result1 = list_meet_name(lst)
+        if result1[0]:
             output_text.insert(tk.END, "В столбце " + str(i+1)
                 + " предположительно содержится имя." + os.linesep)
+            output_text.insert(tk.END, "Процент совпадений " + "{:.2f}".format(result1[1]*100)
+                + "%." + os.linesep + os.linesep)
+            continue # Все нашли, можно идти к следующему столбцу
+    
+        # Второй критерий
+        result = list_meet_mail(lst)
+        if result[0]:
+            output_text.insert(tk.END, "В столбце " + str(i+1)
+                + " предположительно содержится mail." + os.linesep)
             output_text.insert(tk.END, "Процент совпадений " + "{:.2f}".format(result[1]*100)
                 + "%." + os.linesep)
-        else:
-            output_text.insert(tk.END, "Предположений для столбца " + str(i+1)
-                + " не найдено." + os.linesep)
+            continue # Все нашли, можно идти к следующему столбцу
+        
+        # Соответствия критериям не найдено
+        output_text.insert(tk.END, "Предположений для столбца " + str(i+1)
+            + " не найдено." + os.linesep + os.linesep)
     
 #обработчик нажатия кнопки
 def process_button():
@@ -108,9 +145,9 @@ def process_button():
         
     mb.showinfo(title=None, message="Готово!")
 
-# Создание кнопки
-button=tk.Button(window, text="Прочитать файл", command=process_button)
+#кнопка
+button=tk.Button(window, text = "Прочитать файл", command=process_button)
 button.grid(row=4, column=1)
 
-# Запуск цикла mainloop
+#mainloop
 window.mainloop()
