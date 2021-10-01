@@ -78,19 +78,23 @@ def list_meet_name(fields_list):
         if meet_name(list_item):
             counter_meet += 1
     # Конец подсчета
-    if counter_meet / counter_total > 0.2:
-        return True
+    ratio = counter_meet / counter_total
+    if ratio > 0.2:
+        return True, ratio
     # Не набралось нужного количества совпадений
-    return False
+    return False, ratio
     
 # Пройти все столбцы    
 def check_all_columns(df):
     columns_cnt = df.shape[1]
     for i in range(columns_cnt): # От 0 до columns_cnt-1
         lst = get_column(df, i)
-        if list_meet_name(lst):
+        result = list_meet_name(lst)
+        if result[0]:
             output_text.insert(tk.END, "В столбце " + str(i+1)
                 + " предположительно содержится имя." + os.linesep)
+            output_text.insert(tk.END, "Процент совпадений " + "{:.2f}".format(result[1]*100)
+                + "%." + os.linesep)
         else:
             output_text.insert(tk.END, "Предположений для столбца " + str(i+1)
                 + " не найдено." + os.linesep)
