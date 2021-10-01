@@ -108,6 +108,30 @@ def list_meet_mail(fields_list):
     # Не набралось нужного количества совпадений
     return False, ratio
     
+ # Если в этом поле телефон, пусть вернет True    
+def meet_telephone(field):
+    checkfor = ['95', '( )']
+    for s in checkfor:
+        if s in str(field): # Нашлось!
+            return True
+    # Ничего не совпало
+    return False
+    
+    # Если в этом списке многие элементы содержат телефон, пусть вернет True    
+def list_meet_telephone(fields_list):
+    counter_total = 0
+    counter_meet = 0
+    for list_item in fields_list:
+        counter_total += 1
+        if meet_telephone(list_item):
+            counter_meet += 1
+    # Конец подсчета
+    ratio = counter_meet / counter_total
+    if ratio > 0.5:
+        return True, ratio
+    # Не набралось нужного количества совпадений
+    return False, ratio
+    
 # Пройти все столбцы    
 def check_all_columns(df):
     columns_cnt = df.shape[1]
@@ -128,6 +152,15 @@ def check_all_columns(df):
         if result[0]:
             output_text.insert(tk.END, "В столбце " + str(i+1)
                 + " предположительно содержится mail." + os.linesep)
+            output_text.insert(tk.END, "Процент совпадений " + "{:.2f}".format(result[1]*100)
+                + "%." + os.linesep)
+            continue # Все нашли, можно идти к следующему столбцу
+        
+        # Третий критерий
+        result = list_meet_telephone(lst)
+        if result[0]:
+            output_text.insert(tk.END, "В столбце " + str(i+1)
+                + " предположительно содержится телефон." + os.linesep)
             output_text.insert(tk.END, "Процент совпадений " + "{:.2f}".format(result[1]*100)
                 + "%." + os.linesep)
             continue # Все нашли, можно идти к следующему столбцу
